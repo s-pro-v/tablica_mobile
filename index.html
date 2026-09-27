@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Terminal Mobilny Floty // ODBIORNIK</title>
+
+    <!-- LZ-String: dekompresja danych z linku QR -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Google Fonts: JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap"
+        rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <header class="mobile-header">
+        <div class="header-top">
+            <div class="system-title">
+                <i class="bi bi-phone" style="color: var(--highlight-color);"></i>
+                <span>Terminal Floty</span>
+            </div>
+            <div class="status-badge">
+                <span class="led"></span>
+                <span>Pamięć Offline</span>
+            </div>
+        </div>
+
+        <div class="sync-info">
+            <div>
+                Zsynchronizowano: <strong id="lastSyncDate" style="color: var(--highlight-color);">Brak danych</strong>
+            </div>
+            <button type="button" id="openClearModalBtn" class="btn-clear">
+                <i class="bi bi-trash"></i> Wyczyść
+            </button>
+        </div>
+
+        <div class="stats-strip">
+            <div class="stats-item">
+                <span>Razem:</span>
+                <strong id="countTotal">0</strong>
+            </div>
+            <span style="color: var(--border-hover);">|</span>
+            <div class="stats-item alert">
+                <span>≥1 Dzień:</span>
+                <strong id="countAlerts">0</strong>
+            </div>
+            <span style="color: var(--border-hover);">|</span>
+            <div class="stats-item">
+                <span>Ciągniki:</span>
+                <strong id="countTractors" style="color: var(--vehicle-tractor);">0</strong>
+            </div>
+            <span style="color: var(--border-hover);">|</span>
+            <div class="stats-item">
+                <span>Dostawcze:</span>
+                <strong id="countBoxTrucks" style="color: var(--vehicle-boxtruck);">0</strong>
+            </div>
+        </div>
+    </header>
+
+    <section class="search-module">
+        <div class="search-input-wrapper">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="Szukaj ID, miejsca, notatek..."
+                autocomplete="off">
+        </div>
+
+        <div class="chips-scroll">
+            <button type="button" class="filter-chip active" data-filter="all">
+                Wszystkie (<span id="chipCountAll">0</span>)
+            </button>
+            <button type="button" class="filter-chip chip-alert" data-filter="days">
+                ≥1 Dzień na placu (<span id="chipCountDays">0</span>)
+            </button>
+            <button type="button" class="filter-chip" data-filter="tractor">
+                Ciągniki (<span id="chipCountTractors">0</span>)
+            </button>
+            <button type="button" class="filter-chip" data-filter="boxtruck">
+                Dostawcze (<span id="chipCountBoxTrucks">0</span>)
+            </button>
+        </div>
+    </section>
+
+    <main class="cards-list" id="cardsContainer">
+        <!-- Renderowane przez JS -->
+    </main>
+
+    <div id="clearModal" class="modal-backdrop">
+        <div class="modal-box">
+            <div style="font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--hazard-red);">
+                <i class="bi bi-exclamation-triangle"></i> Wyczyścić bazę w telefonie?
+            </div>
+            <p style="font-size: 0.72rem; color: var(--text-color); line-height: 1.5;">
+                Czy na pewno chcesz usunąć zapisaną listę pojazdów? Dane zostaną wyczyszczone z pamięci tego urządzenia.
+                Będziesz musiał zeskanować kod QR ponownie.
+            </p>
+            <div class="modal-actions">
+                <button type="button" id="cancelClearBtn" class="modal-btn">Anuluj</button>
+                <button type="button" id="confirmClearBtn" class="modal-btn danger">Tak, usuń dane</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pływające powiadomienie Toast -->
+    <div id="toast" class="toast">Powiadomienie</div>
+
+    <script src="app.js">
+
+    </script>
+</body>
+
+</html>

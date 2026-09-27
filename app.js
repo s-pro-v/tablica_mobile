@@ -63,21 +63,50 @@ function checkIncomingQRData() {
             // Dekompresja danych z parametru d
             const decompressed = LZString.decompressFromEncodedURIComponent(match[1]);
             if (decompressed) {
-                const parsed = JSON.parse(decompressed);
+                let syncTs = Date.now();
 
-                // Dane przesyłane są w minimalnej tablicy tablic: [id, typ, loc, time, notes]
-                fleetData = (parsed.data || []).map(item => ({
-                    id: item[0] || 'N/A',
-                    type: item[1] === 'T' ? 'Tractor' : (item[1] === 'B' ? 'Box Truck' : item[1]),
-                    loc: item[2] || '—',
-                    timeStr: item[3] || '0',
-                    notes: item[4] || '',
-                    hours: parseHours(item[3])
-                }));
+                // Obsługa nowego ultra-kompaktowego formatu "TS~ID|Typ|Loc|Mins|Notes~..."
+                if (decompressed.includes('~') || decompressed.includes('|')) {
+                    const segments = decompressed.split('~');
+                    const parsedTs = parseInt(segments[0], 10);
+                    if (!isNaN(parsedTs) && parsedTs > 0) syncTs = parsedTs;
 
-                const syncStamp = new Date(parsed.ts || Date.now()).toLocaleString('pl-PL');
+                    const vehicleRows = segments.slice(1);
+                    fleetData = vehicleRows.filter(r => r.trim().length > 0).map(row => {
+                        const [id, typeCode, loc, minsStr, notes] = row.split('|');
+                        const totalMins = parseInt(minsStr, 10) || 0;
+                        const totalHours = totalMins / 60;
+                        const isT = (typeCode || '').toUpperCase() === 'T';
 
-                // Trwały zapis w telefonie
+                        return {
+                            id: id || 'N/A',
+                            type: isT ? 'Ciągnik' : 'Dostawczy',
+                            loc: loc || '—',
+                            timeStr: formatDisplayHours(totalHours),
+                            notes: notes || '',
+                            hours: totalHours
+                        };
+                    });
+                } else {
+                    // Kompatybilność wsteczna z formatem JSON
+                    const parsed = JSON.parse(decompressed);
+                    syncTs = parsed.ts || Date.now();
+                    fleetData = (parsed.data || []).map(item => {
+                        const isT = item[1] === 'T' || (item[1] || '').toLowerCase() === 'tractor';
+                        return {
+                            id: item[0] || 'N/A',
+                            type: isT ? 'Ciągnik' : 'Dostawczy',
+                            loc: item[2] || '—',
+                            timeStr: item[3] || '0',
+                            notes: item[4] || '',
+                            hours: parseHours(item[3])
+                        };
+                    });
+                }
+
+                const syncStamp = new Date(syncTs).toLocaleString('pl-PL');
+
+                // Trwały zapis w telefonie (offline)
                 localStorage.setItem(STORAGE_KEY, JSON.stringify({
                     savedAt: syncStamp,
                     vehicles: fleetData
@@ -116,10 +145,13 @@ function renderView() {
     const container = document.getElementById('cardsContainer');
     const search = (document.getElementById('searchInput').value || '').toLowerCase().trim();
 
+    const isTractorUnit = (v) => v.type.toLowerCase().includes('ciągnik') || v.type.toLowerCase().includes('tractor') || v.type === 'T';
+    const isBoxTruckUnit = (v) => v.type.toLowerCase().includes('dostawcz') || v.type.toLowerCase().includes('box') || v.type === 'B';
+
     const countAll = fleetData.length;
     const countDays = fleetData.filter(v => v.hours >= 24).length;
-    const countTractors = fleetData.filter(v => v.type.toLowerCase() === 'tractor').length;
-    const countBoxTrucks = fleetData.filter(v => v.type.toLowerCase() === 'box truck').length;
+    const countTractors = fleetData.filter(isTractorUnit).length;
+    const countBoxTrucks = fleetData.filter(isBoxTruckUnit).length;
 
     document.getElementById('countTotal').textContent = countAll;
     document.getElementById('countAlerts').textContent = countDays;
@@ -146,8 +178,8 @@ function renderView() {
 
     const filtered = fleetData.filter(v => {
         const isDays = v.hours >= 24;
-        const isTractor = v.type.toLowerCase() === 'tractor';
-        const isBox = v.type.toLowerCase() === 'box truck';
+        const isTractor = isTractorUnit(v);
+        const isBox = isBoxTruckUnit(v);
 
         if (activeFilter === 'days' && !isDays) return false;
         if (activeFilter === 'tractor' && !isTractor) return false;
@@ -172,7 +204,7 @@ function renderView() {
     container.innerHTML = '';
     filtered.forEach(v => {
         const isDays = v.hours >= 24;
-        const isTractor = v.type.toLowerCase() === 'tractor';
+        const isTractor = isTractorUnit(v);
         const card = document.createElement('div');
         card.className = `vehicle-card ${isDays ? 'alert-days' : ''}`;
 
@@ -180,7 +212,7 @@ function renderView() {
                     <div class="card-row-head">
                         <div class="card-id">${v.id}</div>
                         <span class="card-badge ${isTractor ? 'badge-tractor' : 'badge-boxtruck'}">
-                            ${v.type}
+                            ${isTractor ? 'Ciągnik' : 'Dostawczy'}
                         </span>
                     </div>
 

@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Terminal Mobilny Floty // ODBIORNIK</title>
+    <title>Terminal Mobilny Floty | ODBIORNIK</title>
 
-    <!-- LZ-String: dekompresja danych z linku QR -->
+    <!-- LZ-String: Dekompresja danych z linku QR -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
 
     <!-- Bootstrap Icons -->
@@ -17,104 +17,167 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap"
         rel="stylesheet">
-    <link href="style.css" rel="stylesheet">
 
+
+    <link href="style.css" rel="stylesheet">
 </head>
 
 <body>
-    <header class="mobile-header">
-        <div class="header-top">
-            <div class="system-title">
-                <i class="bi bi-phone" style="color: var(--highlight-color);"></i>
-                <span>Terminal Floty</span>
-            </div>
-            <div class="status-badge">
-                <span class="led"></span>
-                <span>Pamięć Offline</span>
-            </div>
-        </div>
+    <div class="chassis">
+        <!-- Hardware Hex Bolts -->
+        <div class="hex-bolt bolt-tl"></div>
+        <div class="hex-bolt bolt-tr"></div>
+        <div class="hex-bolt bolt-bl"></div>
+        <div class="hex-bolt bolt-br"></div>
 
-        <div class="sync-info">
-            <div>
-                Zsynchronizowano: <strong id="lastSyncDate" style="color: var(--highlight-color);">Brak danych</strong>
-            </div>
-            <button type="button" id="openClearModalBtn" class="btn-clear">
-                <i class="bi bi-trash"></i> Wyczyść
-            </button>
-        </div>
+        <!-- Master Header Panel -->
+        <header class="panel-header">
+            <div class="header-top">
+                <div class="system-title">
+                    <span>Terminal Floty</span>
+                </div>
 
-        <div class="stats-strip">
-            <div class="stats-item">
-                <span>Razem:</span>
-                <strong id="countTotal">0</strong>
-            </div>
-            <span style="color: var(--border-hover);">|</span>
-            <div class="stats-item alert">
-                <span>≥1 Dzień:</span>
-                <strong id="countAlerts">0</strong>
-            </div>
-            <span style="color: var(--border-hover);">|</span>
-            <div class="stats-item">
-                <span>Ciągniki:</span>
-                <strong id="countTractors" style="color: var(--vehicle-tractor);">0</strong>
-            </div>
-            <span style="color: var(--border-hover);">|</span>
-            <div class="stats-item">
-                <span>Dostawcze:</span>
-                <strong id="countBoxTrucks" style="color: var(--vehicle-boxtruck);">0</strong>
-            </div>
-        </div>
-    </header>
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                    <div class="security-badge" title="Status magazynu offline">
+                        <span class="led-indicator led-green"></span>
+                        <span>Offline</span>
+                    </div>
 
-    <section class="search-module">
-        <div class="search-input-wrapper">
-            <i class="bi bi-search search-icon"></i>
-            <input type="text" id="searchInput" class="search-input" placeholder="Szukaj ID, miejsca, notatek..."
-                autocomplete="off">
-        </div>
+                    <div class="btn-bg">
+                        <button type="button" id="themeToggle" class="btn btn-sm" title="Przełącz motyw">
+                            <i class="bi bi-moon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-        <div class="chips-scroll">
-            <button type="button" class="filter-chip active" data-filter="all">
-                Wszystkie (<span id="chipCountAll">0</span>)
-            </button>
-            <button type="button" class="filter-chip chip-alert" data-filter="days">
-                ≥1 Dzień na placu (<span id="chipCountDays">0</span>)
-            </button>
-            <button type="button" class="filter-chip" data-filter="tractor">
-                Ciągniki (<span id="chipCountTractors">0</span>)
-            </button>
-            <button type="button" class="filter-chip" data-filter="boxtruck">
-                Dostawcze (<span id="chipCountBoxTrucks">0</span>)
-            </button>
-        </div>
-    </section>
+            <div class="sync-info">
+                <div>
+                    Zsynchronizowano:
+                    <strong id="lastSyncDate" style="color: var(--highlight-color);">Brak danych</strong>
+                </div>
 
-    <main class="cards-list" id="cardsContainer">
-        <!-- Renderowane przez JS -->
-    </main>
+                <div style="display: flex; gap: 0.35rem; align-items: center;">
+                    <div class="btn-bg">
+                        <button type="button" id="savePdfBtn" class="btn btn-sm btn-accent"
+                            title="Zapisz do PDF (1 strona)">
+                            <i class="bi bi-file-earmark-pdf"></i> PDF
+                        </button>
+                    </div>
 
+                    <div class="btn-bg">
+                        <button type="button" id="openClearModalBtn" class="btn btn-sm btn-danger">
+                            <i class="bi bi-trash"></i> Wyczyść
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="hazard-bar"></div>
+
+        <!-- Telemetry Summary Matrix -->
+        <section class="rack-module">
+            <div class="module-top">
+                <span class="module-title">
+                    <span class="led-indicator led-active"></span>
+                    <span>Status na Placu</span>
+                </span>
+                <span class="module-hint">TELEMETRIA PAMIĘCI</span>
+            </div>
+
+            <div class="summary-matrix">
+                <div class="metric-cell">
+                    <div class="metric-label">
+                        <i class="bi bi-collection"></i>
+                        <span>Razem</span>
+                    </div>
+                    <div class="metric-val" id="countTotal">0</div>
+                </div>
+
+                <div class="metric-cell accent-red">
+                    <div class="metric-label">
+                        <i class="bi bi-calendar-x"></i>
+                        <span>≥1 Dzień</span>
+                    </div>
+                    <div class="metric-val" id="countAlerts" style="color: var(--hazard-red);">0</div>
+                </div>
+
+                <div class="metric-cell accent-blue">
+                    <div class="metric-label">
+                        <i class="bi bi-truck"></i>
+                        <span>Ciągniki</span>
+                    </div>
+                    <div class="metric-val" id="countTractors" style="color: var(--vehicle-tractor);">0</div>
+                </div>
+
+                <div class="metric-cell accent-orange">
+                    <div class="metric-label">
+                        <i class="bi bi-truck-front"></i>
+                        <span>Dostawcze</span>
+                    </div>
+                    <div class="metric-val" id="countBoxTrucks" style="color: var(--vehicle-boxtruck);">0</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search & Filter Module -->
+        <section class="rack-module">
+            <div class="search-module">
+                <div class="search-input-wrapper">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input"
+                        placeholder="Szukaj ID, miejsca, notatek..." autocomplete="off">
+                </div>
+
+                <div class="chips-scroll">
+                    <button type="button" class="filter-chip active" data-filter="all">
+                        Wszystkie (<span id="chipCountAll">0</span>)
+                    </button>
+                    <button type="button" class="filter-chip chip-alert" data-filter="days">
+                        ≥1 Dzień (<span id="chipCountDays">0</span>)
+                    </button>
+                    <button type="button" class="filter-chip" data-filter="tractor">
+                        Tractor (<span id="chipCountTractors">0</span>)
+                    </button>
+                    <button type="button" class="filter-chip" data-filter="boxtruck">
+                        Box Truck (<span id="chipCountBoxTrucks">0</span>)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cards View -->
+        <main class="cards-list" id="cardsContainer">
+            <!-- Renderowane przez JS -->
+        </main>
+    </div>
+
+    <!-- Confirm Modal -->
     <div id="clearModal" class="modal-backdrop">
         <div class="modal-box">
-            <div style="font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--hazard-red);">
-                <i class="bi bi-exclamation-triangle"></i> Wyczyścić bazę w telefonie?
+            <div class="modal-header">
+                <i class="bi bi-exclamation-triangle"></i>
+                <span>Wyczyścić bazę w telefonie?</span>
             </div>
-            <p style="font-size: 0.72rem; color: var(--text-color); line-height: 1.5;">
+            <p class="modal-body">
                 Czy na pewno chcesz usunąć zapisaną listę pojazdów? Dane zostaną wyczyszczone z pamięci tego urządzenia.
-                Będziesz musiał zeskanować kod QR ponownie.
+                Będziesz musiał zeskanować kod QR ponownie ze stacji nadajnika.
             </p>
             <div class="modal-actions">
-                <button type="button" id="cancelClearBtn" class="modal-btn">Anuluj</button>
-                <button type="button" id="confirmClearBtn" class="modal-btn danger">Tak, usuń dane</button>
+                <div class="btn-bg">
+                    <button type="button" id="cancelClearBtn" class="btn btn-sm">Anuluj</button>
+                </div>
+                <div class="btn-bg">
+                    <button type="button" id="confirmClearBtn" class="btn btn-sm btn-danger">Tak, usuń dane</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Pływające powiadomienie Toast -->
+    <!-- Toast -->
     <div id="toast" class="toast">Powiadomienie</div>
-
-    <script src="app.js">
-
-    </script>
+    <script src="app.js"></script>
 </body>
 
 </html>

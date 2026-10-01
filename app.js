@@ -78,7 +78,7 @@ try {
 
                             return {
                                 id: id || 'N/A',
-                                type: isT ? 'Ciągnik' : 'Dostawczy',
+                                type: isT ? 'Tractor' : 'Box truck',
                                 loc: loc || '—',
                                 timeStr: formatDisplayHours(totalHours),
                                 notes: notes || '',
@@ -92,7 +92,7 @@ try {
                             const isT = item[1] === 'T' || (item[1] || '').toLowerCase() === 'tractor';
                             return {
                                 id: item[0] || 'N/A',
-                                type: isT ? 'Tractor' : 'Box Truck',
+                                type: isT ? 'Tractor' : 'Box truck',
                                 loc: item[2] || '—',
                                 timeStr: item[3] || '0',
                                 notes: item[4] || '',
@@ -203,29 +203,33 @@ try {
             card.className = `vehicle-card ${isDays ? 'alert-days' : ''}`;
 
             card.innerHTML = `
-                        <div class="card-row-head">
+                        <div class="card-col card-col-id">
+                            <span class="label">ID Pojazdu</span>
                             <div class="card-id">${v.id}</div>
+                        </div>
+
+                        <div class="card-col card-col-type">
+                            <span class="label">Typ</span>
                             <span class="card-badge ${isTractor ? 'badge-tractor' : 'badge-boxtruck'}">
-                                ${isTractor ? 'Tractor' : 'Box Truck'}
+                                ${isTractor ? 'Tractor' : 'Box truck'}
                             </span>
                         </div>
 
-                        <div class="card-grid">
-                            <div class="grid-item">
-                                <span class="label">Lokalizacja</span>
-                                <span class="value value-loc">${v.loc}</span>
-                            </div>
-                            <div class="grid-item">
-                                <span class="label">Czas na placu</span>
-                                <span class="value ${isDays ? 'value-time-alert' : ''}">
-                                    ${formatDisplayHours(v.hours)}
-                                </span>
-                            </div>
+                        <div class="card-col card-col-loc">
+                            <span class="label">Lokalizacja</span>
+                            <span class="value value-loc">${v.loc}</span>
                         </div>
 
-                        <div>
+                        <div class="card-col card-col-time">
+                            <span class="label">Czas na placu</span>
+                            <span class="value ${isDays ? 'value-time-alert' : ''}">
+                                ${formatDisplayHours(v.hours)}
+                            </span>
+                        </div>
+
+                        <div class="card-col card-col-notes">
                             <span class="label">Notatki / Uwagi</span>
-                            <div class="notes-box">${v.notes || '—'}</div>
+                            <div class="notes-text" title="${v.notes || ''}">${v.notes || '—'}</div>
                         </div>
                     `;
             container.appendChild(card);
@@ -239,8 +243,8 @@ try {
             return;
         }
 
-        const isTractorUnit = (v) => v.type.toLowerCase().includes('tractor') || v.type.toLowerCase().includes('tractor') || v.type === 'T';
-        const isBoxTruckUnit = (v) => v.type.toLowerCase().includes('box') || v.type.toLowerCase().includes('box') || v.type === 'B';
+        const isTractorUnit = (v) => v.type.toLowerCase().includes('ciągnik') || v.type.toLowerCase().includes('tractor') || v.type === 'T';
+        const isBoxTruckUnit = (v) => v.type.toLowerCase().includes('dostawcz') || v.type.toLowerCase().includes('box') || v.type === 'B';
         const search = (document.getElementById('searchInput').value || '').toLowerCase().trim();
 
         let list = fleetData.filter(v => {
@@ -265,7 +269,6 @@ try {
         let fontSize = '8pt';
         let headerFontSize = '7.5pt';
 
-        // Dynamiczne skalowanie, by dokument gwarantowanie zmieścił się na 1 stronie A4 Landscape
         if (totalRows > 40) {
             rowPadding = '1px 3px';
             fontSize = '6pt';
@@ -289,7 +292,7 @@ try {
         const rowsHtml = list.map((v, idx) => {
             const isDays = v.hours >= 24;
             const isTractor = isTractorUnit(v);
-            const typeLabel = isTractor ? 'TRACTOR' : 'BOX TRUCK';
+            const typeLabel = isTractor ? 'Tractor' : 'Box truck';
             const typeClass = isTractor ? 'badge-t' : 'badge-b';
             return `
                         <tr class="${isDays ? 'alert-days' : ''}">
